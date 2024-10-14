@@ -19,7 +19,7 @@ RUN mkdir "models" && \
 COPY requirements.txt /app/srt/requirements.txt
 RUN pip install -r requirements.txt
 # 使用原始源安装 mcelery, 镜像不够新
-RUN pip install -i https://pypi.org/simple mcelery==0.0.3
+RUN pip install -i https://pypi.org/simple mcelery==0.1.0
 
 COPY *.py /app/srt/
 

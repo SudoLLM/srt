@@ -1,10 +1,13 @@
+import os
+
+import torch
 from mcelery.cos import download_cos_file, get_local_path, upload_cos_file
 from mcelery.infer import celery_app, register_infer_tasks
 
 from srt import transcribe, fix_srt
 
 
-@celery_app.task(name="srt_infer", queue="srt_infer")
+@celery_app.task(lazy=False, name="srt_infer", queue="srt_infer", autoretry_for=(Exception,), default_retry_delay=10)
 def srt_infer_task(audio_cos: str, text: str, output_cos: str) -> str:
     """
     根据音频文件生成字幕服务
@@ -16,6 +19,10 @@ def srt_infer_task(audio_cos: str, text: str, output_cos: str) -> str:
     audio_path = download_cos_file(audio_cos)
 
     srt = transcribe(str(audio_path))
+
+    if os.getenv("EMPTY_CACHE"):
+        torch.cuda.empty_cache()
+
     if text != "":
         fix_srt(srt, text)
 
